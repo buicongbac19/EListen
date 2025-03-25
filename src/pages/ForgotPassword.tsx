@@ -1,4 +1,4 @@
-import { Container, Box, Typography, Input, InputLabel } from "@mui/material";
+import { Container, Box, Typography } from "@mui/material";
 import ForgotPasswordForm from "../components/ForgotPasswordForm";
 
 export default function ForgotPassword() {
