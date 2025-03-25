@@ -44,6 +44,7 @@ export default function LoginForm({ shiftLeft, setShiftLeft }: Props) {
     register,
     handleSubmit,
     watch,
+    setError,
     formState: { errors },
   } = useForm<IUserLoginItem>({
     defaultValues: {
@@ -58,8 +59,19 @@ export default function LoginForm({ shiftLeft, setShiftLeft }: Props) {
   const navigate = useNavigate();
 
   const onSubmit = async (data: IUserLoginItem) => {
-    const response = await login(data);
-    if (response.status === 200) navigate("/home");
+    try {
+      const response = await login(data);
+      if (response.status === 200) {
+        navigate("/home");
+      } else {
+        throw new Error(response.data.message || "Đăng nhập thất bại");
+      }
+    } catch (error: any) {
+      setError("email", {
+        type: "manual",
+        message: error.message || "Có lỗi xảy ra, vui lòng thử lại!",
+      });
+    }
   };
 
   const firstError = Object.values(errors)[0] as any;

@@ -38,6 +38,7 @@ export default function SignupForm({ shiftLeft, setShiftLeft }: Props) {
     register,
     handleSubmit,
     watch,
+    setError,
     formState: { errors },
   } = useForm<IUserRegisterItem>({
     defaultValues: {
@@ -64,8 +65,19 @@ export default function SignupForm({ shiftLeft, setShiftLeft }: Props) {
   };
 
   const onSubmit = async (data: IUserRegisterItem) => {
-    const response = await registerUser(data);
-    if (response.status === 201) setShiftLeft(false);
+    try {
+      const response = await registerUser(data);
+      if (response.status === 201) {
+        setShiftLeft(false);
+      } else {
+        throw new Error(response.data.message || "Đăng ký thất bại");
+      }
+    } catch (error: any) {
+      setError("email", {
+        type: "manual",
+        message: error.message || "Có lỗi xảy ra, vui lòng thử lại!",
+      });
+    }
   };
 
   const firstError =
