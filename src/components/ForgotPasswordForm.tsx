@@ -6,10 +6,7 @@ import {
   FormControl,
   Link,
   Button,
-  FormControlLabel,
-  Checkbox,
 } from "@mui/material";
-import { IUserItem } from "../types/user";
 import { login } from "../api/auth";
 
 const inputStyle = {
@@ -31,8 +28,8 @@ export default function ForgotPasswordForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<IUserItem>();
-  const onSubmit = async (data: IUserItem) => {
+  } = useForm();
+  const onSubmit = async (data: any) => {
     const response = await login(data);
     console.log(response);
   };
