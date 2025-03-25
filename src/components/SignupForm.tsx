@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   Box,
@@ -6,7 +7,12 @@ import {
   FormControl,
   Link,
   Button,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { registerUser } from "../api/auth";
+import { IUserRegisterItem } from "../types/user";
 
 type Props = {
   shiftLeft: boolean;
@@ -31,11 +37,35 @@ export default function SignupForm({ shiftLeft, setShiftLeft }: Props) {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
-  } = useForm();
+  } = useForm<IUserRegisterItem>({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-  const onSubmit = (data: any) => {
-    console.log("Signup Data:", data);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const passwordValue = watch("password", "");
+  const confirmPasswordValue = watch("confirmPassword", "");
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword((prev) => !prev);
+  };
+
+  const onSubmit = async (data: IUserRegisterItem) => {
+    const response = await registerUser(data);
+    if (response.status === 201) setShiftLeft(false);
   };
 
   const firstError =
@@ -57,9 +87,7 @@ export default function SignupForm({ shiftLeft, setShiftLeft }: Props) {
     >
       <Box sx={{ height: "50px", width: "100%", marginTop: "20px" }}>
         <Input
-          {...register("firstName", {
-            required: "Họ là bắt buộc",
-          })}
+          {...register("firstName", { required: "Họ là bắt buộc" })}
           sx={inputStyle}
           type="text"
           placeholder="Họ"
@@ -68,9 +96,7 @@ export default function SignupForm({ shiftLeft, setShiftLeft }: Props) {
 
       <Box sx={{ height: "50px", width: "100%", marginTop: "20px" }}>
         <Input
-          {...register("lastName", {
-            required: "Tên là bắt buộc",
-          })}
+          {...register("lastName", { required: "Tên là bắt buộc" })}
           sx={inputStyle}
           type="text"
           placeholder="Tên"
@@ -104,23 +130,61 @@ export default function SignupForm({ shiftLeft, setShiftLeft }: Props) {
               value: 16,
               message: "Mật khẩu phải có ít hơn 16 ký tự",
             },
+            pattern: {
+              value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,16}$/,
+              message:
+                "Mật khẩu phải có ít nhất 1 chữ hoa, 1 chữ thường, 1 số và có thể chứa ký tự đặc biệt",
+            },
           })}
           sx={inputStyle}
-          type="password"
+          type={showPassword ? "text" : "password"}
           placeholder="Mật khẩu"
+          endAdornment={
+            passwordValue && (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={togglePasswordVisibility}
+                  sx={{
+                    "&:focus": {
+                      outline: "none !important",
+                    },
+                  }}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            )
+          }
         />
       </Box>
 
+      {/* Trường nhập lại mật khẩu */}
       <Box sx={{ height: "50px", width: "100%", marginTop: "20px" }}>
         <Input
           {...register("confirmPassword", {
             required: "Vui lòng nhập lại mật khẩu",
-            validate: (value, data) =>
-              value === data.password || "Mật khẩu không giống nhau",
+            validate: (value) =>
+              value === passwordValue || "Mật khẩu không giống nhau",
           })}
           sx={inputStyle}
-          type="password"
+          type={showConfirmPassword ? "text" : "password"}
           placeholder="Nhập lại mật khẩu"
+          endAdornment={
+            confirmPasswordValue && (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={toggleConfirmPasswordVisibility}
+                  sx={{
+                    "&:focus": {
+                      outline: "none !important",
+                    },
+                  }}
+                >
+                  {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            )
+          }
         />
       </Box>
 

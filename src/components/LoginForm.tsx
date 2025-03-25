@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   Box,
@@ -8,10 +9,14 @@ import {
   Button,
   FormControlLabel,
   Checkbox,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { IUserLoginItem } from "../types/user";
 import { login } from "../api/auth";
+import { useNavigate } from "react-router-dom";
 
 const clientId = "YOUR_GOOGLE_CLIENT_ID";
 
@@ -47,9 +52,14 @@ export default function LoginForm({ shiftLeft, setShiftLeft }: Props) {
       remember: false,
     },
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const navigate = useNavigate();
+
   const onSubmit = async (data: IUserLoginItem) => {
     const response = await login(data);
-    console.log(response);
+    if (response.status === 200) navigate("/home");
   };
 
   const firstError = Object.values(errors)[0] as any;
@@ -84,18 +94,38 @@ export default function LoginForm({ shiftLeft, setShiftLeft }: Props) {
           <Input
             {...register("password", {
               required: "Mật khẩu là bắt buộc",
-              minLength: {
-                value: 8,
-                message: "Mật khẩu phải có ít nhất 8 ký tự",
-              },
-              maxLength: {
-                value: 16,
-                message: "Mật khẩu phải có ít hơn 16 ký tự",
-              },
             })}
             sx={inputStyle}
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Mật khẩu"
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  sx={{
+                    "&:focus": {
+                      outline: "none !important",
+                    },
+                  }}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {watch("password") !== "" ? (
+                    showPassword ? (
+                      <VisibilityOff
+                        sx={{
+                          "&:focus": {
+                            outline: "none !important",
+                          },
+                        }}
+                      />
+                    ) : (
+                      <Visibility sx={{ outline: "none !important" }} />
+                    )
+                  ) : (
+                    ""
+                  )}
+                </IconButton>
+              </InputAdornment>
+            }
           />
         </Box>
 
